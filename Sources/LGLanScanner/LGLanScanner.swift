@@ -4,6 +4,8 @@
 import Foundation
 import ComposableArchitecture
 
+// Source: https://github.com/MaatheusGois/lan-scanner -> add mac os infoplist if you want app mac
+
 @MainActor
 public enum LGLanScannerKey: @preconcurrency DependencyKey {
     public static let liveValue: LGLanScanner = LGLanScanner()
