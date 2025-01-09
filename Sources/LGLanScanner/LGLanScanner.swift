@@ -23,18 +23,18 @@ public extension DependencyValues {
 @MainActor
 public final class LGLanScanner {
     
-    nonisolated(unsafe) var connectedDevices = [LanDevice]()
-    nonisolated(unsafe) var progress: CGFloat = .zero
-    nonisolated(unsafe) var isFinished = false
+   public nonisolated(unsafe) var connectedDevices = [LanDevice]()
+    public nonisolated(unsafe) var progress: CGFloat = .zero
+    public nonisolated(unsafe) var isFinished = false
     
     nonisolated(unsafe) private lazy var scanner = LanScanner(delegate: self)
     
-    nonisolated(unsafe) func start() {
+    public nonisolated(unsafe) func start() {
         connectedDevices.removeAll()
         scanner.start()
     }
     
-    nonisolated(unsafe) func stop() {
+    public nonisolated(unsafe) func stop() {
         scanner.stop()
     }
 }
