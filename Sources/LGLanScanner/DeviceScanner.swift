@@ -1,29 +1,27 @@
 //// The Swift Programming Language
 //// https://docs.swift.org/swift-book
 ///
-import LanScanInternal
 import Foundation
 import ComposableArchitecture
 
-
 @MainActor
-private enum DeviceScannerKey: @preconcurrency DependencyKey {
-    static let liveValue: DeviceScanner = DeviceScanner()
+public enum LGLanScannerKey: @preconcurrency DependencyKey {
+    public static let liveValue: LGLanScanner = LGLanScanner()
 }
 
-extension DeviceScannerKey: @preconcurrency TestDependencyKey {
-    static let testValue: DeviceScanner = DeviceScanner() //TODO: mock ?
+extension LGLanScannerKey: @preconcurrency TestDependencyKey {
+    public static let testValue: LGLanScanner = LGLanScanner() //TODO: mock ?
 }
 
-extension DependencyValues {
-    var scanner: DeviceScanner {
-        get { self[DeviceScannerKey.self] }
-        set { self[DeviceScannerKey.self] = newValue }
+public extension DependencyValues {
+    var scanner: LGLanScanner {
+        get { self[LGLanScannerKey.self] }
+        set { self[LGLanScannerKey.self] = newValue }
     }
 }
 
 @MainActor
-final class DeviceScanner {
+public final class LGLanScanner {
     
     nonisolated(unsafe) var connectedDevices = [LanDevice]()
     nonisolated(unsafe) var progress: CGFloat = .zero
@@ -41,16 +39,16 @@ final class DeviceScanner {
     }
 }
 
-extension DeviceScanner: @preconcurrency LanScannerDelegate {
-    func lanScanHasUpdatedProgress(_ progress: CGFloat, address: String) {
+extension LGLanScanner: @preconcurrency LanScannerDelegate {
+    public func lanScanHasUpdatedProgress(_ progress: CGFloat, address: String) {
         self.progress = progress
     }
     
-    func lanScanDidFindNewDevice(_ device: LanDevice) {
+    public func lanScanDidFindNewDevice(_ device: LanDevice) {
         connectedDevices.append(device)
     }
     
-    func lanScanDidFinishScanning() {
+    public func lanScanDidFinishScanning() {
         isFinished = true
     }
 }
