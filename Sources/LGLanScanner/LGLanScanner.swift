@@ -47,20 +47,40 @@ public final class LGLanScanner {
     let scanner = LanScanner()
     private var scanTask: Task<Void, Never>?
 
-    public func start() async throws {
+//    public func start() async throws {
+        public func start() {
+
         connectedDevices.removeAll()
         
         scanTask = Task {
-            for await device in scanner.scanStream() {
-                connectedDevices.append(device)
-                print("Appareil trouvé : \(device.name)")
+//            for await device in scanner.scanStream() {
+//                connectedDevices.append(device)
+//                print("Appareil trouvé : \(device.name)")
+//            }
+//            isFinished = true
+            
+            
+            for await event in scanner.scanStream() {
+                                    progress = event.progress
+
+                if let device = event.device {
+                    print("📡 Appareil trouvé : \(device.name) - \(device.ipAddress)")
+                                    connectedDevices.append(device)
+//                    progress = event.progress
+                } else {
+//                    progress = event.progress
+                    print("⏳ Progression : \(Int(event.progress * 100))%")
+                }
             }
-            isFinished = true
+            print("✅ Scan terminé")
+                        isFinished = true
+
+            
         }
         
     }
     
-    public func stop() async throws {
+    public func stop() {
         scanner.cancel()
         scanTask?.cancel()
     }
