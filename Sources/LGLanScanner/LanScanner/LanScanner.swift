@@ -7,8 +7,8 @@
 
 import LanScanInternal
 import CoreGraphics
-//import ComposableArchitecture
 
+/*
 public struct LanDevice {
     public var name: String
     public var ipAddress: String
@@ -74,6 +74,7 @@ extension LanScanner: LANScanDelegate {
         delegate?.lanScanDidFinishScanning()
     }
 }
+*/
 
 //**************************************
 //
@@ -131,3 +132,103 @@ extension LanScanner: LANScanDelegate {
 //    public var id: UUID { .init() }
 //}
 //
+
+//import Foundation
+//import CoreGraphics
+
+public struct LanDevice: Sendable {
+    public var name: String
+    public var ipAddress: String
+    public var mac: String
+    public var brand: String
+}
+
+public class LanScanner: NSObject {
+    private var scanner: LanScan?
+    private var onDeviceFound: ((LanDevice) -> Void)?
+    private var onFinish: (() -> Void)?
+    private var isCancelled = false
+    
+    // MARK: - Annuler un scan en cours
+    public func cancel() {
+        isCancelled = true
+        scanner?.stop()
+    }
+    
+    // MARK: - Version simple : résultat à la fin
+//    public func scan() async -> [LanDevice] {
+//        await withCheckedContinuation { continuation in
+//            var foundDevices: [LanDevice] = []
+//            
+//            startScan(
+//                deviceHandler: { [weak self] device in
+//                    guard self?.isCancelled == false else { return }
+//                    foundDevices.append(device)
+//                },
+//                finishHandler: { [weak self] in
+//                    guard self?.isCancelled == false else {
+//                        continuation.resume(returning: [])
+//                        return
+//                    }
+//                    continuation.resume(returning: foundDevices)
+//                }
+//            )
+//        }
+//    }
+    
+    public func scanStream() -> AsyncStream<LanDevice> {
+        AsyncStream { continuation in
+            startScan(
+                deviceHandler: { [weak self] device in
+                    guard self?.isCancelled == false else { return }
+                    Task { @MainActor in
+                        continuation.yield(device)
+                    }
+                },
+                finishHandler: { [weak self] in
+                    guard self?.isCancelled == false else {
+                        Task { @MainActor in
+                            continuation.finish()
+                        }
+                        return
+                    }
+                    Task { @MainActor in
+                        continuation.finish()
+                    }
+                }
+            )
+        }
+    }
+
+    
+    // MARK: - Fonction interne pour démarrer le scan
+    private func startScan(deviceHandler: @escaping (LanDevice) -> Void,
+                           finishHandler: @escaping () -> Void) {
+        isCancelled = false
+        scanner?.stop()
+        scanner = LanScan(delegate: self)
+        self.onDeviceFound = deviceHandler
+        self.onFinish = finishHandler
+        scanner?.start()
+    }
+}
+
+// MARK: - Conformité à LANScanDelegate
+extension LanScanner: LANScanDelegate {
+    public func lanScanHasUpdatedProgress(_ counter: Int, address: String!) {}
+    
+    public func lanScanDidFindNewDevice(_ device: [AnyHashable : Any]!) {
+        guard let device = device as? [AnyHashable: String] else { return }
+        let found = LanDevice(
+            name: device[DEVICE_NAME] ?? "",
+            ipAddress: device[DEVICE_IP_ADDRESS] ?? "",
+            mac: device[DEVICE_MAC] ?? "",
+            brand: device[DEVICE_BRAND] ?? ""
+        )
+        onDeviceFound?(found)
+    }
+    
+    public func lanScanDidFinishScanning() {
+        onFinish?()
+    }
+}

@@ -3,6 +3,8 @@
 ///
 import Foundation
 import ComposableArchitecture
+import LanScanInternal
+
 
 // Source: https://github.com/MaatheusGois/lan-scanner -> add mac os infoplist if you want app mac
 
@@ -25,37 +27,83 @@ public extension DependencyValues {
 @MainActor
 public final class LGLanScanner {
     
-   public nonisolated(unsafe) var connectedDevices = [LanDevice]()
+    public nonisolated(unsafe) var connectedDevices = [LanDevice]()
     public nonisolated(unsafe) var progress: CGFloat = .zero
     public nonisolated(unsafe) var isFinished = false
     
-    nonisolated(unsafe) private lazy var scanner = LanScanner(delegate: self)
+    //     private lazy var scanner: LanScanner = {
+    //        LanScanner(delegate: self)
+    //    }()
+    //
+    //    public func start() {
+    //        connectedDevices.removeAll()
+    //        scanner.start()
+    //    }
+    //
+    //    public func stop() {
+    //        scanner.stop()
+    //    }
     
-    public nonisolated(unsafe) func start() {
+    let scanner = LanScanner()
+    private var scanTask: Task<Void, Never>?
+
+    public func start() async throws {
         connectedDevices.removeAll()
-        scanner.start()
+        
+        scanTask = Task {
+            for await device in scanner.scanStream() {
+                connectedDevices.append(device)
+                print("Appareil trouvé : \(device.name)")
+            }
+            isFinished = true
+        }
+        
     }
     
-    public nonisolated(unsafe) func stop() {
-        scanner.stop()
+    public func stop() async throws {
+        scanner.cancel()
+        scanTask?.cancel()
+    }
+    
+}
+    
+    
+    
+
+//
+//extension LGLanScanner: @preconcurrency LanScannerDelegate {
+//    public func lanScanHasUpdatedProgress(_ progress: CGFloat, address: String) {
+//        self.progress = progress
+//    }
+//    
+//    public func lanScanDidFindNewDevice(_ device: LanDevice) {
+//        connectedDevices.append(device)
+//    }
+//    
+//    public func lanScanDidFinishScanning() {
+//        isFinished = true
+//    }
+//}
+//
+//extension LanDevice: Identifiable { //TODO: tester retroactive !!!
+//    public var id: UUID { .init() }
+//}
+
+
+/*
+let scanner = LanScanner()
+
+// Lancer un scan
+let task = Task {
+    for await device in scanner.scanStream() {
+        print("Appareil trouvé : \(device.name)")
     }
 }
 
-extension LGLanScanner: @preconcurrency LanScannerDelegate {
-    public func lanScanHasUpdatedProgress(_ progress: CGFloat, address: String) {
-        self.progress = progress
-    }
-    
-    public func lanScanDidFindNewDevice(_ device: LanDevice) {
-        connectedDevices.append(device)
-    }
-    
-    public func lanScanDidFinishScanning() {
-        isFinished = true
-    }
+// Annuler après 3 secondes
+DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+    print("⛔️ Annulation du scan")
+    scanner.cancel()
+    task.cancel()
 }
-
-extension LanDevice: Identifiable { //TODO: tester retroactive !!!
-    public var id: UUID { .init() }
-}
-
+*/
