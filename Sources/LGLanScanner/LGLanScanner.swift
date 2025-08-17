@@ -27,25 +27,21 @@ public extension DependencyValues {
 @MainActor
 public final class LGLanScanner {
     
-    public nonisolated(unsafe) var connectedDevices = [LanDevice]()
     public nonisolated(unsafe) var progress: CGFloat = .zero
     public nonisolated(unsafe) var isFinished = false
-    
+    public nonisolated(unsafe) var currentDevice = LanDevice()
+
     let scanner = LanScanner()
     private var scanTask: Task<Void, Never>?
     
     public func start() {
-        connectedDevices.removeAll()
         scanTask = Task {
-            
             for await event in scanner.scanStream() {
                 progress = event.progress
                 if let device = event.device {
-                    print("📡 Appareil trouvé : \(device.name) - \(device.ipAddress)")
-                    connectedDevices.append(device)
+                    currentDevice = device
                 }
             }
-            print("✅ Scan terminé")
             isFinished = true
         }
     }

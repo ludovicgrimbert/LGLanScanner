@@ -13,6 +13,19 @@ public struct LanDevice: Sendable {
     public let ipAddress: String
     public let mac: String
     public let brand: String
+    
+    public init(
+        name: String = "",
+        ipAddress: String = "",
+        mac: String = "",
+        brand: String = ""
+    ) {
+        self.name = name
+        self.ipAddress = ipAddress
+        self.mac = mac
+        self.brand = brand
+    }
+    
 }
 
 public struct LanScanEvent: Sendable {
