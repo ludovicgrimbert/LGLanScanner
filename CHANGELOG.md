@@ -3,6 +3,10 @@
 All notable changes to this package. [Keep a Changelog](https://keepachangelog.com) format,
 [SemVer](https://semver.org) — on `0.x`, minor versions may break source compatibility.
 
+## [0.3.1] - 2026-09-12
+
+Release tag on main after merging fix_lazy_scanner / remove_tca / example_app. Same content as 0.3.0.
+
 ## [0.3.0] - 2026-09-12
 
 ### Added
