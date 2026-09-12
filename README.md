@@ -5,7 +5,7 @@ Scans the local network (ping sweep + ARP, from
 devices found, as an `@Observable` main-actor class. iOS 17+, Swift 6, no dependencies.
 
 ```swift
-.package(url: "https://github.com/ludovicgrimbert/LGLanScanner", exact: "0.3.0")
+.package(url: "https://github.com/ludovicgrimbert/LGLanScanner", exact: "0.3.1")
 ```
 
 ## Usage
