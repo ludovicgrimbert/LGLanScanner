@@ -7,20 +7,16 @@ let package = Package(
     name: "LGLanScanner",
     platforms: [.iOS(.v17)],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "LGLanScanner",
             targets: ["LGLanScanner"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", from: "1.0.0")
-    ],
+    // No dependencies: the scanner is plain Swift Concurrency on top of the Objective-C
+    // LanScanInternal target.
     targets: [
         .target(
             name: "LGLanScanner",
-            dependencies: ["LanScanInternal",
-                           .product(name: "ComposableArchitecture", package: "swift-composable-architecture")
-                          ]
+            dependencies: ["LanScanInternal"]
         ),
         .target(
             name: "LanScanInternal",
@@ -29,8 +25,5 @@ let package = Package(
                 .process("Resources")
             ]
         ),
-//        .testTarget(
-//            name: "LanScannerTests",
-//            dependencies: []),
     ]
 )
