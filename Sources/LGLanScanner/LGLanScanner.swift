@@ -1,61 +1,75 @@
-//// The Swift Programming Language
-//// https://docs.swift.org/swift-book
-///
+//
+//  LGLanScanner.swift
+//  LGLanScanner
+//
+//  Scans the local network and exposes the progress and the devices found, on the main actor.
+//  Source of the underlying scanner: https://github.com/MaatheusGois/lan-scanner
+//  (add a macOS Info.plist if you want a Mac app).
+//
+
 import Foundation
-import ComposableArchitecture
+import LanScanInternal
+import Observation
 
-// Source: https://github.com/MaatheusGois/lan-scanner -> add mac os infoplist if you want app mac
-
-@MainActor
-public enum LGLanScannerKey: @preconcurrency DependencyKey {
-    public static let liveValue: LGLanScanner = LGLanScanner()
-}
-
-extension LGLanScannerKey: @preconcurrency TestDependencyKey {
-    public static let testValue: LGLanScanner = LGLanScanner() //TODO: mock ?
-}
-
-public extension DependencyValues {
-    var scanner: LGLanScanner {
-        get { self[LGLanScannerKey.self] }
-        set { self[LGLanScannerKey.self] = newValue }
-    }
-}
-
+/// Drives one network scan at a time. `@Observable`: read `progress`, `devices`,
+/// `currentDevice`, `isScanning` and `isFinished` straight from a SwiftUI view, no polling.
+///
+/// ```swift
+/// @State private var scanner = LGLanScanner()
+/// …
+/// ProgressView(value: scanner.progress)
+/// ForEach(scanner.devices) { device in Text(device.ipAddress) }
+/// Button(scanner.isScanning ? "Stop" : "Scan") { scanner.isScanning ? scanner.stop() : scanner.start() }
+/// ```
+@Observable
 @MainActor
 public final class LGLanScanner {
-    
-   public nonisolated(unsafe) var connectedDevices = [LanDevice]()
-    public nonisolated(unsafe) var progress: CGFloat = .zero
-    public nonisolated(unsafe) var isFinished = false
-    
-    nonisolated(unsafe) private lazy var scanner = LanScanner(delegate: self)
-    
-    public nonisolated(unsafe) func start() {
-        connectedDevices.removeAll()
-        scanner.start()
-    }
-    
-    public nonisolated(unsafe) func stop() {
-        scanner.stop()
-    }
-}
 
-extension LGLanScanner: @preconcurrency LanScannerDelegate {
-    public func lanScanHasUpdatedProgress(_ progress: CGFloat, address: String) {
-        self.progress = progress
+    /// 0...1 progress of the current scan.
+    public private(set) var progress: CGFloat = .zero
+    /// `true` while a scan runs.
+    public private(set) var isScanning = false
+    /// `true` once the current scan has gone through the whole IP range (or was stopped).
+    public private(set) var isFinished = false
+    /// The last device found by the current scan.
+    public private(set) var currentDevice = LanDevice()
+    /// Every device found by the current scan, in discovery order, one entry per IP address.
+    public private(set) var devices: [LanDevice] = []
+
+    private let scanner = LanScanner()
+    @ObservationIgnored private var scanTask: Task<Void, Never>?
+
+    public init() {}
+
+    /// Starts a scan, resetting the state left by a previous one.
+    public func start() {
+        scanTask?.cancel()
+        progress = .zero
+        isScanning = true
+        isFinished = false
+        currentDevice = LanDevice()
+        devices = []
+        scanTask = Task {
+            for await event in scanner.scanStream() {
+                progress = event.progress
+                if let device = event.device {
+                    currentDevice = device
+                    if !devices.contains(where: { $0.ipAddress == device.ipAddress }) {
+                        devices.append(device)
+                    }
+                }
+            }
+            isScanning = false
+            isFinished = true
+        }
     }
-    
-    public func lanScanDidFindNewDevice(_ device: LanDevice) {
-        connectedDevices.append(device)
-    }
-    
-    public func lanScanDidFinishScanning() {
+
+    /// Cancels the current scan.
+    public func stop() {
+        scanner.cancel()
+        scanTask?.cancel()
+        scanTask = nil
+        isScanning = false
         isFinished = true
     }
 }
-
-extension LanDevice: Identifiable { //TODO: tester retroactive !!!
-    public var id: UUID { .init() }
-}
-
