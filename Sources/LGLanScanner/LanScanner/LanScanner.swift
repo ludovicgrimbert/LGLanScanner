@@ -8,12 +8,15 @@
 import LanScanInternal
 import CoreGraphics
 
-public struct LanDevice: Sendable {
+/// A device found on the local network. Identified by its IP address.
+public struct LanDevice: Sendable, Hashable, Identifiable {
     public let name: String
     public let ipAddress: String
     public let mac: String
     public let brand: String
-    
+
+    public var id: String { ipAddress }
+
     public init(
         name: String = "",
         ipAddress: String = "",
