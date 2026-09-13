@@ -1,5 +1,4 @@
 // swift-tools-version: 6.0
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
@@ -7,23 +6,17 @@ let package = Package(
     name: "LGLanScanner",
     platforms: [.iOS(.v17)],
     products: [
-        .library(
-            name: "LGLanScanner",
-            targets: ["LGLanScanner"]),
+        .library(name: "LGLanScanner", targets: ["LGLanScanner"]),
     ],
-    // No dependencies: the scanner is plain Swift Concurrency on top of the Objective-C
-    // LanScanInternal target.
+    // No dependencies: Swift Concurrency over unprivileged ICMP sockets, plus two routing-table
+    // reads in C (the iOS SDK does not ship <net/route.h>).
     targets: [
         .target(
             name: "LGLanScanner",
-            dependencies: ["LanScanInternal"]
+            dependencies: ["LanScanInternal"],
+            resources: [.process("Resources")]
         ),
-        .target(
-            name: "LanScanInternal",
-            dependencies: [],
-            resources: [
-                .process("Resources")
-            ]
-        ),
+        .target(name: "LanScanInternal"),
+        .testTarget(name: "LGLanScannerTests", dependencies: ["LGLanScanner"]),
     ]
 )
