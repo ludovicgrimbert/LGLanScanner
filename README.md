@@ -1,12 +1,16 @@
 # LGLanScanner
 
-Finds the devices on the local Wi-Fi network: a ping sweep of the subnet, then the MAC
-(ARP cache), manufacturer (bundled IEEE OUI registry) and name (reverse DNS / mDNS) of
-each device that answered. Swift Concurrency, off the main thread, nothing leaves the
-LAN. iOS 17+, Swift 6, no dependencies.
+Two ways to find the devices on the local Wi-Fi network, iOS 17+, Swift 6, no dependencies:
+
+- **LGLanScanner** — a ping sweep of the subnet, then the MAC (ARP cache), manufacturer
+  (bundled IEEE OUI registry) and name (reverse DNS / mDNS) of each device that answered.
+  Swift Concurrency, off the main thread, nothing leaves the LAN.
+- **LGLanDiscovery** — asks the network who offers a service (Bonjour and SSDP/UPnP): faster,
+  and it returns only the devices you care about, televisions by default, with their names.
 
 ```swift
-.package(url: "https://github.com/ludovicgrimbert/LGLanScanner", from: "1.0.0")
+.package(url: "https://github.com/ludovicgrimbert/LGLanScanner", from: "1.1.0")
+// products: "LGLanScanner", "LGLanDiscovery"
 ```
 
 ## Usage
@@ -80,10 +84,47 @@ longer than its timeout.
 | `LanDevice(name:ipAddress:mac:brand:)` | same, plus `isGateway`; the router no longer gets " (router)" appended to its name |
 | brand fetched from api.macvendors.com when unknown | bundled registry only; unknown stays empty |
 
+## LGLanDiscovery
+
+```swift
+import LGLanDiscovery
+
+@State private var discovery = LGLanDiscovery()   // Bonjour + SSDP, .televisions, 5 s window
+
+Button("Find TVs") { discovery.start() }
+ForEach(discovery.televisions) { tv in            // vendor recognised, one per host
+    Text("\(tv.name) — \(tv.host) — \(tv.vendor.rawValue)")
+}
+ForEach(discovery.services) { service in          // everything announced
+    Text("\(service.type) at \(service.host):\(service.port)")
+}
+ForEach(discovery.errors, id: \.self) { Text($0.localizedDescription) }
+```
+
+`LanService.attributes` holds the Bonjour TXT record, or the SSDP headers plus the UPnP
+description fields (`friendlyname`, `manufacturer`, `modelname`, `udn`, Sony's
+`x_scalarwebapi_baseurl`). `vendor` is a heuristic over all of that: `.sony`, `.lg`, `.unknown`.
+
+`.televisions` looks for `_googlecast._tcp`, `_androidtvremote2._tcp`, `_airplay._tcp`
+(Bonjour) and IRCC, Scalar Web API, webOS second screen, DIAL (SSDP). `.everything` browses the
+common Bonjour types and `ssdp:all`. Build your own `LanDiscoveryConfiguration` for anything else.
+
+What the app must declare:
+
+| | Info.plist | Entitlement |
+|---|---|---|
+| Ping sweep | `NSLocalNetworkUsageDescription` | — |
+| Bonjour | + every type in `NSBonjourServices` | — |
+| SSDP | `NSLocalNetworkUsageDescription` | `com.apple.developer.networking.multicast` (request it from Apple; without it the engine fails with `multicastNotAllowed` and the others carry on) |
+
+The simulator enforces none of the entitlements. Engines run together: one failing lands in
+`errors`, `state` is `.failed` only when all of them fail.
+
 ## Example app
 
-Open `LGLanScanner.xcworkspace`: the package next to `Example/LGLanScannerExample`, a one-screen
-app (start/stop, progress, error, device list) built against the working tree. Generated with
+Open `LGLanScanner.xcworkspace`: the package next to `Example/LGLanScannerExample`, two tabs
+(the sweep: start/stop, progress, error, device list; the discovery: televisions and every
+service, with the engines' errors) built against the working tree. Generated with
 [xcodegen](https://github.com/yonaskolb/XcodeGen) from `Example/project.yml`
 (`cd Example && xcodegen generate` after adding files). The simulator shares the Mac's network.
 
@@ -93,7 +134,7 @@ app (start/stop, progress, error, device list) built against the working tree. G
 xcodebuild test -workspace LGLanScanner.xcworkspace -scheme LGLanScanner -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
 
-The tests cover the address arithmetic, the ICMP packets (including a real ping of
-loopback), the OUI registry, the routing-table reads, the engine's fail-fast paths and the
-façade's state machine with a scripted engine. Sweeping a real LAN is only exercised by the
-example app.
+The tests cover the address arithmetic, the ICMP packets (including a real ping of the
+gateway when there is one), the OUI registry, the routing-table reads, the engines' fail-fast
+paths, the SSDP/UPnP parsing, the vendor heuristics and both façades' state machines with
+scripted engines. Sweeping or discovering on a real LAN is exercised by the example app.
