@@ -2,8 +2,8 @@
 //  LGLanScannerExampleApp.swift
 //  LGLanScannerExample
 //
-//  Scans the local network with LGLanScanner and lists what it finds. The simulator shares
-//  the Mac's network, so it works there too.
+//  Two tabs: the ping sweep (LGLanScanner) and the service discovery (LGLanDiscovery).
+//  The simulator shares the Mac's network, so both work there too.
 //
 
 import SwiftUI
@@ -12,7 +12,12 @@ import SwiftUI
 struct LGLanScannerExampleApp: App {
     var body: some Scene {
         WindowGroup {
-            ScanView()
+            TabView {
+                ScanView()
+                    .tabItem { Label("Scan", systemImage: "dot.radiowaves.left.and.right") }
+                DiscoveryView()
+                    .tabItem { Label("Discovery", systemImage: "tv.badge.wifi") }
+            }
         }
     }
 }

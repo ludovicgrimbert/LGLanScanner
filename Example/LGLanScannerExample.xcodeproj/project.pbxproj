@@ -9,15 +9,19 @@
 /* Begin PBXBuildFile section */
 		0DE7578C9FDB8D5201C461D4 /* LGLanScannerExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3912F1D809EA271061FB11 /* LGLanScannerExampleApp.swift */; };
 		55D9186DB9749005491BEB96 /* ScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEA2F1E1684DB4943AB00ADA /* ScanView.swift */; };
+		9204459AC4D47C90F650616B /* DiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 943AF4125D47F45670A635FA /* DiscoveryView.swift */; };
 		A8486857C3835722F850B6A1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 35BE641109CF8457E69B9620 /* Assets.xcassets */; };
+		ACE73E8E454D476005A96D8F /* LGLanDiscovery in Frameworks */ = {isa = PBXBuildFile; productRef = EB5759DDA7F13CF8EA0CA184 /* LGLanDiscovery */; };
 		E95ACEFFA92D473649599B26 /* LGLanScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 2C28836FC58BF075F05A71B5 /* LGLanScanner */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0698CC979409439B3FD48A02 /* LGLanScanner */ = {isa = PBXFileReference; lastKnownFileType = folder; name = LGLanScanner; path = ..; sourceTree = SOURCE_ROOT; };
+		2CAFC6A209FEC4865A11BCE0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		35BE641109CF8457E69B9620 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3D3912F1D809EA271061FB11 /* LGLanScannerExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGLanScannerExampleApp.swift; sourceTree = "<group>"; };
 		64D44F6EBB95B332D7802575 /* LGLanScannerExample.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = LGLanScannerExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		943AF4125D47F45670A635FA /* DiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryView.swift; sourceTree = "<group>"; };
 		AEA2F1E1684DB4943AB00ADA /* ScanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -27,6 +31,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E95ACEFFA92D473649599B26 /* LGLanScanner in Frameworks */,
+				ACE73E8E454D476005A96D8F /* LGLanDiscovery in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -53,6 +58,7 @@
 			isa = PBXGroup;
 			children = (
 				35BE641109CF8457E69B9620 /* Assets.xcassets */,
+				2CAFC6A209FEC4865A11BCE0 /* Info.plist */,
 				EE22AFAB5ED40C6F382AA50D /* App */,
 			);
 			path = LGLanScannerExample;
@@ -70,6 +76,7 @@
 		EE22AFAB5ED40C6F382AA50D /* App */ = {
 			isa = PBXGroup;
 			children = (
+				943AF4125D47F45670A635FA /* DiscoveryView.swift */,
 				3D3912F1D809EA271061FB11 /* LGLanScannerExampleApp.swift */,
 				AEA2F1E1684DB4943AB00ADA /* ScanView.swift */,
 			);
@@ -94,6 +101,7 @@
 			name = LGLanScannerExample;
 			packageProductDependencies = (
 				2C28836FC58BF075F05A71B5 /* LGLanScanner */,
+				EB5759DDA7F13CF8EA0CA184 /* LGLanDiscovery */,
 			);
 			productName = LGLanScannerExample;
 			productReference = 64D44F6EBB95B332D7802575 /* LGLanScannerExample.app */;
@@ -152,6 +160,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9204459AC4D47C90F650616B /* DiscoveryView.swift in Sources */,
 				0DE7578C9FDB8D5201C461D4 /* LGLanScannerExampleApp.swift in Sources */,
 				55D9186DB9749005491BEB96 /* ScanView.swift in Sources */,
 			);
@@ -287,12 +296,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UBS5NLP4XW;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Scans your local network to list the devices on it.";
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_FILE = LGLanScannerExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -313,12 +317,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UBS5NLP4XW;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Scans your local network to list the devices on it.";
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_FILE = LGLanScannerExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -365,6 +364,10 @@
 		2C28836FC58BF075F05A71B5 /* LGLanScanner */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LGLanScanner;
+		};
+		EB5759DDA7F13CF8EA0CA184 /* LGLanDiscovery */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LGLanDiscovery;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

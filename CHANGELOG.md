@@ -3,6 +3,28 @@
 All notable changes to this package. [Keep a Changelog](https://keepachangelog.com) format,
 [SemVer](https://semver.org).
 
+## [1.1.0] - 2026-09-13
+
+### Added
+- `LGLanDiscovery` product: service discovery instead of a sweep. `BonjourDiscoveryEngine`
+  (`NWBrowser`, endpoints resolved to IPv4 + port) and `SSDPDiscoveryEngine` (`M-SEARCH` over
+  `NWConnectionGroup`, devices enriched with their UPnP description: `friendlyName`,
+  `manufacturer`, `modelName`, Sony's `X_ScalarWebAPI_BaseURL`). `LGLanDiscovery` (`@Observable`,
+  main actor) runs the engines together: `services`, `televisions` (vendor recognised, one per
+  host), `state`, `errors`; one engine failing does not fail the others.
+- `LanService` (`name`, `type`, `host`, `port`, `attributes`, `source`, `vendor`),
+  `LanServiceVendor` (`sony`, `lg`, `unknown`), `LanDiscoveryConfiguration` with the
+  `.televisions` preset (Cast, Android TV remote, AirPlay; IRCC, Scalar Web API, webOS
+  second screen, DIAL) and `.everything`, `LanDiscoveryError`.
+- 16 tests (message building/parsing, UPnP description, vendor heuristics, façade with
+  scripted engines, live engines run tolerant of the environment); a Discovery tab in the
+  example app, which now has an Info.plist with `NSBonjourServices`.
+
+### Notes
+- Bonjour needs each type in `NSBonjourServices`; SSDP needs the
+  `com.apple.developer.networking.multicast` entitlement on a device (surfaces as
+  `LanDiscoveryError.multicastNotAllowed`). The simulator is not restricted.
+
 ## [1.0.0] - 2026-09-13
 
 First stable release: the Objective-C core is gone, replaced by a Swift Concurrency engine.
