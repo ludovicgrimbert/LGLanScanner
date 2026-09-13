@@ -17,6 +17,11 @@ struct ScanView: View {
                     ProgressView(value: scanner.progress) {
                         Text(statusText)
                     }
+                    if let error = scanner.error {
+                        Label(error.localizedDescription, systemImage: "exclamationmark.triangle")
+                            .foregroundStyle(.red)
+                            .font(.footnote)
+                    }
                     Button(scanner.isScanning ? "Stop" : "Start scan") {
                         if scanner.isScanning {
                             scanner.stop()
@@ -43,13 +48,12 @@ struct ScanView: View {
     }
 
     private var statusText: String {
-        if scanner.isScanning {
-            return "Scanning… \(Int(scanner.progress * 100)) %"
+        switch scanner.state {
+        case .idle: "Idle"
+        case .scanning: "Scanning… \(Int(scanner.progress * 100)) %"
+        case .finished: "Done — \(scanner.devices.count) device(s)"
+        case .failed: "Failed"
         }
-        if scanner.isFinished {
-            return "Done — \(scanner.devices.count) device(s)"
-        }
-        return "Idle"
     }
 }
 
@@ -62,6 +66,9 @@ private struct DeviceRow: View {
             HStack {
                 Text(device.name.isEmpty ? device.ipAddress : device.name)
                     .font(.headline)
+                if device.isGateway {
+                    Image(systemName: "wifi.router").foregroundStyle(.secondary)
+                }
                 if isLatest {
                     Text("latest").font(.caption2).padding(.horizontal, 6).padding(.vertical, 2)
                         .background(.tint.opacity(0.15), in: Capsule())
