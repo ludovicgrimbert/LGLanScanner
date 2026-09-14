@@ -3,6 +3,13 @@
 All notable changes to this package. [Keep a Changelog](https://keepachangelog.com) format,
 [SemVer](https://semver.org).
 
+## [1.2.0] - 2026-09-14
+
+### Added
+- `LGHardwareAddress.lookup(_:timeout:)`: the MAC address of one host, without a sweep —
+  pings it (unprivileged ICMP) so the ARP cache knows it, then reads the cache. Lets an app
+  store the stable identity of a device and find it again after its IP address changes.
+
 ## [1.1.0] - 2026-09-13
 
 ### Added

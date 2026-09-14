@@ -227,3 +227,31 @@ struct LiveEngineTests {
         #expect(count == 2)
     }
 }
+
+@Suite("Hardware address lookup")
+struct HardwareAddressTests {
+
+    @Test("a malformed address is nil without touching the network")
+    func malformed() async {
+        #expect(await LGHardwareAddress.lookup("not an address") == nil)
+        #expect(await LGHardwareAddress.lookup("10.0.0.256") == nil)
+    }
+
+    @Test("an address nobody holds is nil once the ping timed out")
+    func nobodyThere() async {
+        // TEST-NET-1 (RFC 5737): never routed, never in the ARP cache.
+        let clock = ContinuousClock()
+        let start = clock.now
+        #expect(await LGHardwareAddress.lookup("192.0.2.1", timeout: .milliseconds(200)) == nil)
+        #expect(clock.now - start < .seconds(3))
+    }
+
+    @Test("the default gateway, when there is one, has a MAC in the expected format")
+    func gateway() async throws {
+        guard let gateway = RoutingTable.defaultGateway(interface: LanScanConfiguration().interface) else { return }
+        let mac = await LGHardwareAddress.lookup(gateway.description)
+        if let mac {
+            #expect(mac.wholeMatch(of: /[0-9a-f]{2}(:[0-9a-f]{2}){5}/) != nil)
+        }
+    }
+}
