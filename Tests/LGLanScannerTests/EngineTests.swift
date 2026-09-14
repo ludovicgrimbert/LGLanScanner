@@ -255,3 +255,38 @@ struct HardwareAddressTests {
         }
     }
 }
+
+@Suite("Wake-on-LAN")
+struct WakeOnLANTests {
+
+    @Test("a MAC in any common spelling gives the same six bytes; anything else is nil")
+    func macBytes() {
+        let expected: [UInt8] = [0xA4, 0x83, 0xE7, 0x12, 0x34, 0x56]
+        #expect(LGWakeOnLAN.bytes(of: "a4:83:e7:12:34:56") == expected)
+        #expect(LGWakeOnLAN.bytes(of: "A4-83-E7-12-34-56") == expected)
+        #expect(LGWakeOnLAN.bytes(of: "a483e7123456") == expected)
+        #expect(LGWakeOnLAN.bytes(of: "a4:83:e7:12:34") == nil)
+        #expect(LGWakeOnLAN.bytes(of: "zz:83:e7:12:34:56") == nil)
+        #expect(LGWakeOnLAN.bytes(of: "") == nil)
+    }
+
+    @Test("the magic packet is 6 × 0xFF then the MAC 16 times")
+    func magicPacket() throws {
+        let packet = try #require(LGWakeOnLAN.magicPacket(for: "a4:83:e7:12:34:56"))
+        #expect(packet.count == 102)
+        #expect(Array(packet.prefix(6)) == [UInt8](repeating: 0xFF, count: 6))
+        let mac: [UInt8] = [0xA4, 0x83, 0xE7, 0x12, 0x34, 0x56]
+        for repetition in 0..<16 {
+            let start = 6 + repetition * 6
+            #expect(Array(packet[start..<start + 6]) == mac)
+        }
+        #expect(LGWakeOnLAN.magicPacket(for: "nope") == nil)
+    }
+
+    @Test("waking a malformed MAC fails before touching the network; a valid one goes out")
+    func wake() async throws {
+        await #expect(throws: LGWakeOnLAN.Error.invalidMAC("nope")) { try await LGWakeOnLAN.wake(mac: "nope") }
+        // A broadcast send needs no receiver: it must simply not fail on a machine with a network.
+        try await LGWakeOnLAN.wake(mac: "a4:83:e7:12:34:56", count: 1)
+    }
+}
