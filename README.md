@@ -138,3 +138,14 @@ The tests cover the address arithmetic, the ICMP packets (including a real ping 
 gateway when there is one), the OUI registry, the routing-table reads, the engines' fail-fast
 paths, the SSDP/UPnP parsing, the vendor heuristics and both façades' state machines with
 scripted engines. Sweeping or discovering on a real LAN is exercised by the example app.
+
+## One host's MAC address
+
+```swift
+let mac = await LGHardwareAddress.lookup("192.168.1.24")   // "a4:83:e7:12:34:56" or nil
+```
+
+The host is pinged first so the ARP cache holds it, then the cache is read. Store the MAC
+with the device: when DHCP moves it to another address, a discovery or a sweep finds it
+again by comparing MACs.
+
