@@ -3,6 +3,12 @@
 All notable changes to this package. [Keep a Changelog](https://keepachangelog.com) format,
 [SemVer](https://semver.org).
 
+## [1.3.0] - 2026-09-14
+
+### Added
+- `LGWakeOnLAN`: `wake(mac:port:count:)` sends the magic packet over UDP broadcast (three
+  times by default, port 9); `magicPacket(for:)` and `bytes(of:)` for the pure parts.
+
 ## [1.2.0] - 2026-09-14
 
 ### Added

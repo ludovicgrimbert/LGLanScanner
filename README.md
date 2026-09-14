@@ -149,3 +149,11 @@ The host is pinged first so the ARP cache holds it, then the cache is read. Stor
 with the device: when DHCP moves it to another address, a discovery or a sweep finds it
 again by comparing MACs.
 
+## Wake-on-LAN
+
+```swift
+try await LGWakeOnLAN.wake(mac: "a4:83:e7:12:34:56")   // magic packet, UDP broadcast, 3 times
+```
+
+Wakes a device in deep standby, provided it has the feature switched on (Sony: "Remote start").
+
